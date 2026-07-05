@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SMS Spam Classifier — Model Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #fafafa;
+      --surface: #ffffff;
+      --border: #eaeaea;
+      --text: #111;
+      --text-secondary: #666;
+      --text-tertiary: #999;
+      --accent: #000;
+      --green: #0a0;
+      --radius: 12px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0a0a0a;
+        --surface: #111;
+        --border: #222;
+        --text: #ededed;
+        --text-secondary: #888;
+        --text-tertiary: #555;
+        --accent: #fff;
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 15px; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 80px 24px 120px;
+    }
+
+    /* Header */
+    header {
+      margin-bottom: 64px;
+    }
+    header h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
+    header p {
+      color: var(--text-secondary);
+      font-size: 0.93rem;
+      max-width: 600px;
+    }
+    .tag {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Sections */
+    section {
+      margin-bottom: 56px;
+    }
+    section h2 {
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-tertiary);
+      margin-bottom: 20px;
+    }
+
+    /* Stats row */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .stat {
+      background: var(--surface);
+      padding: 20px;
+    }
+    .stat .label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-tertiary);
+      margin-bottom: 4px;
+    }
+    .stat .value {
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+    .stat .sub {
+      font-size: 0.72rem;
+      color: var(--text-tertiary);
+      margin-top: 2px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Model cards */
+    .models {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .model {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      overflow: hidden;
+    }
+    .model-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .model-header h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .model-header .algo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-tertiary);
+      padding: 3px 8px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+    }
+    .model-metrics {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1px;
+      background: var(--border);
+    }
+    @media (max-width: 640px) {
+      .model-metrics { grid-template-columns: repeat(3, 1fr); }
+    }
+    .model-metrics .cell {
+      background: var(--surface);
+      padding: 16px 20px;
+      text-align: center;
+    }
+    .model-metrics .cell .k {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-tertiary);
+      margin-bottom: 4px;
+    }
+    .model-metrics .cell .v {
+      font-size: 1.1rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+    .model-footer {
+      padding: 14px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 0.72rem;
+      color: var(--text-tertiary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Per-class table */
+    .table-container {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: var(--surface);
+      font-size: 0.68rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-tertiary);
+    }
+    tr:last-child td { border-bottom: none; }
+    td.num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+    }
+    td .class-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      border: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Confusion matrices */
+    .cm-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .cm-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--surface);
+    }
+    .cm-item .cm-title {
+      padding: 14px 18px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+    .cm-item img {
+      width: 100%;
+      display: block;
+      background: #fff;
+    }
+    .cm-item .fallback {
+      padding: 40px 20px;
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--text-tertiary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 80px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 0.72rem;
+      color: var(--text-tertiary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <header>
+      <h1>SMS Spam Classifier</h1>
+      <p id="header-desc">Three baseline models trained on the SMS Spam Collection dataset. Stratified 80/20 split, TF-IDF features with 1–2 grams.</p>
+      <span class="tag" id="source-tag">loading…</span>
+    </header>
+
+    <!-- Dataset Overview -->
+    <section>
+      <h2>Dataset</h2>
+      <div class="stats" id="dataset-stats">
+        <div class="stat">
+          <div class="label">Total</div>
+          <div class="value" id="ds-total">—</div>
+          <div class="sub">messages</div>
+        </div>
+        <div class="stat">
+          <div class="label">Ham</div>
+          <div class="value" id="ds-ham">—</div>
+          <div class="sub" id="ds-ham-pct"></div>
+        </div>
+        <div class="stat">
+          <div class="label">Spam</div>
+          <div class="value" id="ds-spam">—</div>
+          <div class="sub" id="ds-spam-pct"></div>
+        </div>
+        <div class="stat">
+          <div class="label">Train</div>
+          <div class="value" id="ds-train">—</div>
+          <div class="sub">80%</div>
+        </div>
+        <div class="stat">
+          <div class="label">Test</div>
+          <div class="value" id="ds-test">—</div>
+          <div class="sub">20%</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Models -->
+    <section>
+      <h2>Models</h2>
+      <div class="models" id="models-container"></div>
+    </section>
+
+    <!-- Comparison -->
+    <section>
+      <h2>Comparison</h2>
+      <div class="table-container">
+        <table id="cmp-table">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th class="num">Accuracy</th>
+              <th class="num">Precision</th>
+              <th class="num">Recall</th>
+              <th class="num">F1</th>
+              <th class="num">ROC AUC</th>
+              <th class="num">Time</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Per-class Reports -->
+    <section>
+      <h2>Per-Class Metrics</h2>
+      <div class="table-container">
+        <table id="report-table">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Class</th>
+              <th class="num">Precision</th>
+              <th class="num">Recall</th>
+              <th class="num">F1</th>
+              <th class="num">Support</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Confusion Matrices -->
+    <section>
+      <h2>Confusion Matrices</h2>
+      <div class="cm-grid" id="cm-grid"></div>
+    </section>
+
+    <!-- ROC Curves -->
+    <section>
+      <h2>ROC Curves</h2>
+      <div class="cm-grid" id="roc-grid"></div>
+    </section>
+
+    <footer>
+      <span>artifacts/all_models_report.json</span>
+      <span id="generated-at"></span>
+    </footer>
+  </div>
+
+  <script>
+    const EMBEDDED_REPORT = {
+      "generated_at": "2026-07-01T04:18:58.101588+00:00",
+      "dataset": {
+        "path": "spam.csv",
+        "total_rows": 5572,
+        "class_distribution": { "ham": 4825, "spam": 747 },
+        "train_size": 4457,
+        "test_size": 1115,
+        "random_state": 42,
+        "test_size_pct": 0.2
+      },
+      "models": [
+        {
+          "algorithm": "multinomial_nb",
+          "algorithm_label": "MultinomialNB",
+          "metrics": { "accuracy": 0.9856502242152466, "precision": 0.9925925925925926, "recall": 0.8993288590604027, "f1": 0.9436619718309859 },
+          "per_class": {
+            "ham":  { "precision": 0.9846938775510204, "recall": 0.9989648033126294, "f1": 0.9917780061664954, "support": 966 },
+            "spam": { "precision": 0.9925925925925926, "recall": 0.8993288590604027, "f1": 0.9436619718309859, "support": 149 }
+          },
+          "aggregates": {
+            "macro_avg":    { "precision": 0.9886432350718065, "recall": 0.9491468311865161, "f1": 0.9677199889987407, "support": 1115 },
+            "weighted_avg": { "precision": 0.9857494009063515, "recall": 0.9856502242152466, "f1": 0.9853481504570866, "support": 1115 }
+          },
+          "train_size": 4457,
+          "test_size": 1115,
+          "duration_seconds": 0.10401309998997021,
+          "artifact_path": "artifacts/model_multinomial_nb_1782879535699.joblib",
+          "confusion_matrix_path": "artifacts/confusion_matrix_multinomial_nb.png",
+          "roc_auc": 0.9895,
+          "roc_curve_path": "artifacts/roc_curve_multinomial_nb.png",
+          "trained_at": "2026-07-01T04:18:57.521196+00:00"
+        },
+        {
+          "algorithm": "complement_nb",
+          "algorithm_label": "ComplementNB",
+          "metrics": { "accuracy": 0.9829596412556054, "precision": 0.9452054794520548, "recall": 0.9261744966442953, "f1": 0.9355932203389831 },
+          "per_class": {
+            "ham":  { "precision": 0.9886480908152735, "recall": 0.9917184265010351, "f1": 0.9901808785529715, "support": 966 },
+            "spam": { "precision": 0.9452054794520548, "recall": 0.9261744966442953, "f1": 0.9355932203389831, "support": 149 }
+          },
+          "aggregates": {
+            "macro_avg":    { "precision": 0.9669267851336641, "recall": 0.9589464615726653, "f1": 0.9628870494459774, "support": 1115 },
+            "weighted_avg": { "precision": 0.9828427553057492, "recall": 0.9829596412556054, "f1": 0.9828862049441067, "support": 1115 }
+          },
+          "train_size": 4457,
+          "test_size": 1115,
+          "duration_seconds": 0.10052300000097603,
+          "artifact_path": "artifacts/model_complement_nb_1782879537629.joblib",
+          "confusion_matrix_path": "artifacts/confusion_matrix_complement_nb.png",
+          "roc_auc": 0.9920,
+          "roc_curve_path": "artifacts/roc_curve_complement_nb.png",
+          "trained_at": "2026-07-01T04:18:57.805046+00:00"
+        },
+        {
+          "algorithm": "logistic_regression",
+          "algorithm_label": "LogisticRegression",
+          "metrics": { "accuracy": 0.968609865470852, "precision": 0.9913793103448276, "recall": 0.7718120805369127, "f1": 0.8679245283018868 },
+          "per_class": {
+            "ham":  { "precision": 0.965965965965966, "recall": 0.9989648033126294, "f1": 0.9821882951653944, "support": 966 },
+            "spam": { "precision": 0.9913793103448276, "recall": 0.7718120805369127, "f1": 0.8679245283018868, "support": 149 }
+          },
+          "aggregates": {
+            "macro_avg":    { "precision": 0.9786726381553967, "recall": 0.8853884419247711, "f1": 0.9250564117336406, "support": 1115 },
+            "weighted_avg": { "precision": 0.9693620092955179, "recall": 0.968609865470852, "f1": 0.9669189666787015, "support": 1115 }
+          },
+          "train_size": 4457,
+          "test_size": 1115,
+          "duration_seconds": 0.13812659999530297,
+          "artifact_path": "artifacts/model_logistic_regression_1782879537952.joblib",
+          "confusion_matrix_path": "artifacts/confusion_matrix_logistic_regression.png",
+          "roc_auc": 0.9840,
+          "roc_curve_path": "artifacts/roc_curve_logistic_regression.png",
+          "trained_at": "2026-07-01T04:18:58.100868+00:00"
+        }
+      ],
+      "roc_curve_combined_path": "artifacts/roc_curve_all_models.png"
+    };
+
+    const pct = (v) => (v * 100).toFixed(2) + '%';
+    const basename = (p) => String(p || '').split(/[\\/]/).pop();
+    function assetPath(p) {
+      if (!p) return '';
+      let s = String(p).replace(/\\\\/g, '/');
+      const m = s.match(/(artifacts\/.*)$/);
+      return m ? m[1] : s;
+    }
+
+    function render(report, label) {
+      const ds = report.dataset;
+      const models = report.models;
+
+      // Header
+      document.getElementById('header-desc').textContent =
+        `${models.length} baseline models trained on the SMS Spam Collection (${ds.total_rows.toLocaleString()} messages, stratified 80/20 split, TF-IDF 1–2 grams).`;
+      document.getElementById('source-tag').textContent = label;
+
+      // Dataset
+      document.getElementById('ds-total').textContent = ds.total_rows.toLocaleString();
+      document.getElementById('ds-ham').textContent = ds.class_distribution.ham.toLocaleString();
+      document.getElementById('ds-ham-pct').textContent = ((ds.class_distribution.ham / ds.total_rows) * 100).toFixed(1) + '%';
+      document.getElementById('ds-spam').textContent = ds.class_distribution.spam.toLocaleString();
+      document.getElementById('ds-spam-pct').textContent = ((ds.class_distribution.spam / ds.total_rows) * 100).toFixed(1) + '%';
+      document.getElementById('ds-train').textContent = ds.train_size.toLocaleString();
+      document.getElementById('ds-test').textContent = ds.test_size.toLocaleString();
+
+      // Model cards
+      const container = document.getElementById('models-container');
+      container.innerHTML = models.map(m => `
+        <div class="model">
+          <div class="model-header">
+            <h3>${m.algorithm_label}</h3>
+            <span class="algo">${m.algorithm}</span>
+          </div>
+          <div class="model-metrics">
+            <div class="cell"><div class="k">Accuracy</div><div class="v">${pct(m.metrics.accuracy)}</div></div>
+            <div class="cell"><div class="k">Precision</div><div class="v">${pct(m.metrics.precision)}</div></div>
+            <div class="cell"><div class="k">Recall</div><div class="v">${pct(m.metrics.recall)}</div></div>
+            <div class="cell"><div class="k">F1</div><div class="v">${pct(m.metrics.f1)}</div></div>
+            <div class="cell"><div class="k">ROC AUC</div><div class="v">${m.roc_auc != null ? pct(m.roc_auc) : '—'}</div></div>
+          </div>
+          <div class="model-footer">
+            <span>train: ${m.train_size.toLocaleString()}</span>
+            <span>test: ${m.test_size.toLocaleString()}</span>
+            <span>fit: ${m.duration_seconds.toFixed(3)}s</span>
+            <span>artifact: ${basename(m.artifact_path)}</span>
+            <span>trained: ${new Date(m.trained_at).toLocaleDateString()}</span>
+          </div>
+        </div>
+      `).join('');
+
+      // Comparison table
+      document.querySelector('#cmp-table tbody').innerHTML = models.map(m => `
+        <tr>
+          <td>${m.algorithm_label}</td>
+          <td class="num">${pct(m.metrics.accuracy)}</td>
+          <td class="num">${pct(m.metrics.precision)}</td>
+          <td class="num">${pct(m.metrics.recall)}</td>
+          <td class="num">${pct(m.metrics.f1)}</td>
+          <td class="num">${m.roc_auc != null ? pct(m.roc_auc) : '—'}</td>
+          <td class="num">${m.duration_seconds.toFixed(3)}s</td>
+        </tr>
+      `).join('');
+
+      // Per-class report
+      const reportRows = [];
+      models.forEach(m => {
+        ['ham', 'spam'].forEach(cls => {
+          const c = m.per_class[cls];
+          reportRows.push(`
+            <tr>
+              <td>${m.algorithm_label}</td>
+              <td><span class="class-badge">${cls}</span></td>
+              <td class="num">${pct(c.precision)}</td>
+              <td class="num">${pct(c.recall)}</td>
+              <td class="num">${pct(c.f1)}</td>
+              <td class="num">${c.support.toLocaleString()}</td>
+            </tr>`);
+        });
+        const w = m.aggregates.weighted_avg;
+        reportRows.push(`
+          <tr>
+            <td>${m.algorithm_label}</td>
+            <td><span class="class-badge">weighted avg</span></td>
+            <td class="num">${pct(w.precision)}</td>
+            <td class="num">${pct(w.recall)}</td>
+            <td class="num">${pct(w.f1)}</td>
+            <td class="num">${w.support.toLocaleString()}</td>
+          </tr>`);
+      });
+      document.querySelector('#report-table tbody').innerHTML = reportRows.join('');
+
+      // Confusion matrices
+      document.getElementById('cm-grid').innerHTML = models.map(m => {
+        const src = assetPath(m.confusion_matrix_path);
+        return `
+          <div class="cm-item">
+            <div class="cm-title">${m.algorithm_label}</div>
+            <img src="${src}" alt="Confusion matrix — ${m.algorithm_label}" loading="lazy"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='block';" />
+            <div class="fallback" style="display:none;">Image not available<br>${basename(src)}</div>
+          </div>`;
+      }).join('');
+
+      // ROC curves
+      const rocCards = models.map(m => {
+        const src = assetPath(m.roc_curve_path);
+        return `
+          <div class="cm-item">
+            <div class="cm-title">${m.algorithm_label} · AUC ${m.roc_auc != null ? pct(m.roc_auc) : '—'}</div>
+            <img src="${src}" alt="ROC curve — ${m.algorithm_label}" loading="lazy"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='block';" />
+            <div class="fallback" style="display:none;">Image not available<br>${basename(src)}</div>
+          </div>`;
+      });
+      if (report.roc_curve_combined_path) {
+        const csrc = assetPath(report.roc_curve_combined_path);
+        rocCards.push(`
+          <div class="cm-item" style="grid-column:1/-1;">
+            <div class="cm-title">All Models (combined)</div>
+            <img src="${csrc}" alt="Combined ROC curves" loading="lazy"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='block';" />
+            <div class="fallback" style="display:none;">Image not available<br>${basename(csrc)}</div>
+          </div>`);
+      }
+      document.getElementById('roc-grid').innerHTML = rocCards.join('');
+
+      // Footer
+      try {
+        document.getElementById('generated-at').textContent =
+          'generated ' + new Date(report.generated_at).toLocaleString();
+      } catch (_) {
+        document.getElementById('generated-at').textContent = report.generated_at;
+      }
+    }
+
+    // Boot
+    render(EMBEDDED_REPORT, 'embedded · all_models_report.json');
+  </script>
+</body>
+</html>
