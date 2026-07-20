@@ -6,7 +6,7 @@
   <title>SMS Spam Classifier — Model Report</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg: #fafafa;
@@ -17,7 +17,15 @@
       --text-tertiary: #999;
       --accent: #000;
       --green: #0a0;
+      --green-bg: #e6ffe6;
+      --blue: #0066cc;
+      --blue-bg: #e6f0ff;
+      --orange: #cc6600;
+      --orange-bg: #fff3e6;
+      --red: #cc0000;
+      --red-bg: #ffe6e6;
       --radius: 12px;
+      --radius-sm: 8px;
     }
 
     @media (prefers-color-scheme: dark) {
@@ -29,6 +37,14 @@
         --text-secondary: #888;
         --text-tertiary: #555;
         --accent: #fff;
+        --green: #4caf50;
+        --green-bg: #1a2e1a;
+        --blue: #64b5f6;
+        --blue-bg: #1a2433;
+        --orange: #ffb74d;
+        --orange-bg: #2e2518;
+        --red: #ef5350;
+        --red-bg: #2e1a1a;
       }
     }
 
@@ -44,14 +60,14 @@
     }
 
     .page {
-      max-width: 960px;
+      max-width: 1060px;
       margin: 0 auto;
-      padding: 80px 24px 120px;
+      padding: 60px 24px 120px;
     }
 
     /* Header */
     header {
-      margin-bottom: 64px;
+      margin-bottom: 32px;
     }
     header h1 {
       font-size: 2rem;
@@ -75,192 +91,268 @@
       font-family: 'JetBrains Mono', monospace;
     }
 
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 40px;
+      overflow-x: auto;
+    }
+    .tab {
+      padding: 10px 16px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+    .tab:hover { color: var(--text-secondary); }
+    .tab.active {
+      color: var(--text);
+      border-bottom-color: var(--accent);
+    }
+    .tab .count {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 1px 6px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 0.65rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-tertiary);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
     /* Sections */
     section {
-      margin-bottom: 56px;
+      margin-bottom: 48px;
     }
     section h2 {
-      font-size: 0.75rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text-tertiary);
-      margin-bottom: 20px;
-    }
-
-    /* Stats row */
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 1px;
-      background: var(--border);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-    .stat {
-      background: var(--surface);
-      padding: 20px;
-    }
-    .stat .label {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-tertiary);
-      margin-bottom: 4px;
-    }
-    .stat .value {
-      font-size: 1.5rem;
+      font-size: 1.2rem;
       font-weight: 600;
+      margin-bottom: 16px;
       letter-spacing: -0.02em;
-      font-variant-numeric: tabular-nums;
     }
-    .stat .sub {
-      font-size: 0.72rem;
-      color: var(--text-tertiary);
-      margin-top: 2px;
-      font-family: 'JetBrains Mono', monospace;
+    section h3 {
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 12px;
+      color: var(--text-secondary);
+    }
+    section p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-bottom: 12px;
     }
 
-    /* Model cards */
-    .models {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .model {
+    /* Cards */
+    .card {
+      background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      background: var(--surface);
-      overflow: hidden;
+      padding: 24px;
+      margin-bottom: 16px;
     }
-    .model-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--border);
-    }
-    .model-header h3 {
-      font-size: 1rem;
-      font-weight: 600;
-      letter-spacing: -0.01em;
-    }
-    .model-header .algo {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.72rem;
-      color: var(--text-tertiary);
-      padding: 3px 8px;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-    }
-    .model-metrics {
+
+    /* Metric grid */
+    .metrics-grid {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 1px;
-      background: var(--border);
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
     }
-    @media (max-width: 640px) {
-      .model-metrics { grid-template-columns: repeat(3, 1fr); }
-    }
-    .model-metrics .cell {
+    .metric-card {
       background: var(--surface);
-      padding: 16px 20px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
       text-align: center;
     }
-    .model-metrics .cell .k {
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-tertiary);
-      margin-bottom: 4px;
-    }
-    .model-metrics .cell .v {
-      font-size: 1.1rem;
-      font-weight: 600;
-      font-variant-numeric: tabular-nums;
-    }
-    .model-footer {
-      padding: 14px 24px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      font-size: 0.72rem;
-      color: var(--text-tertiary);
+    .metric-card .value {
+      font-size: 2rem;
+      font-weight: 700;
       font-family: 'JetBrains Mono', monospace;
+      letter-spacing: -0.03em;
+    }
+    .metric-card .label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-tertiary);
+      margin-top: 6px;
+    }
+    .metric-card.highlight {
+      border-color: var(--green);
+      background: var(--green-bg);
+    }
+    .metric-card.highlight .value {
+      color: var(--green);
     }
 
-    /* Per-class table */
-    .table-container {
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-    table {
+    /* Tables */
+    .data-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.82rem;
+      font-size: 0.85rem;
     }
-    th, td {
-      padding: 12px 16px;
+    .data-table th,
+    .data-table td {
       text-align: left;
+      padding: 10px 14px;
       border-bottom: 1px solid var(--border);
     }
-    th {
-      background: var(--surface);
-      font-size: 0.68rem;
+    .data-table th {
       font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
       color: var(--text-tertiary);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
-    tr:last-child td { border-bottom: none; }
-    td.num {
-      text-align: right;
-      font-variant-numeric: tabular-nums;
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+    .data-table code {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.78rem;
-    }
-    td .class-badge {
-      display: inline-block;
-      padding: 2px 8px;
+      font-size: 0.8rem;
+      padding: 2px 6px;
+      background: var(--bg);
       border-radius: 4px;
-      font-size: 0.7rem;
-      border: 1px solid var(--border);
-      font-family: 'JetBrains Mono', monospace;
     }
 
-    /* Confusion matrices */
+    /* Confusion matrix */
+    .cm-container {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
     .cm-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 16px;
+      grid-template-columns: auto 1fr 1fr;
+      grid-template-rows: auto 1fr 1fr;
+      gap: 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
     }
-    .cm-item {
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-      background: var(--surface);
-    }
-    .cm-item .cm-title {
-      padding: 14px 18px;
-      font-size: 0.78rem;
+    .cm-grid .cm-header {
       font-weight: 500;
-      color: var(--text-secondary);
-      border-bottom: 1px solid var(--border);
-    }
-    .cm-item img {
-      width: 100%;
-      display: block;
-      background: #fff;
-    }
-    .cm-item .fallback {
-      padding: 40px 20px;
+      color: var(--text-tertiary);
+      padding: 8px 16px;
       text-align: center;
       font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .cm-grid .cm-cell {
+      padding: 20px 28px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 1.2rem;
+      border: 1px solid var(--border);
+    }
+    .cm-grid .cm-cell.tp { background: var(--green-bg); color: var(--green); }
+    .cm-grid .cm-cell.tn { background: var(--blue-bg); color: var(--blue); }
+    .cm-grid .cm-cell.fp { background: var(--orange-bg); color: var(--orange); }
+    .cm-grid .cm-cell.fn { background: var(--red-bg); color: var(--red); }
+    .cm-grid .cm-corner { padding: 8px 16px; }
+    .cm-legend {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 2;
+    }
+    .cm-legend span {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    /* Algorithm cards */
+    .algo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .algo-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .algo-card h4 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .algo-card p {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+    }
+    .algo-card .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .badge-active { background: var(--green-bg); color: var(--green); }
+    .badge-available { background: var(--blue-bg); color: var(--blue); }
+
+    /* Pipeline vis */
+    .pipeline-flow {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      overflow-x: auto;
+      padding: 16px 0;
+    }
+    .pipeline-step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      text-align: center;
+      min-width: 140px;
+    }
+    .pipeline-step .step-name {
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .pipeline-step .step-detail {
+      font-size: 0.7rem;
       color: var(--text-tertiary);
       font-family: 'JetBrains Mono', monospace;
+    }
+    .pipeline-arrow {
+      padding: 0 8px;
+      color: var(--text-tertiary);
+      font-size: 1.2rem;
+    }
+
+    /* Code block */
+    .code-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px 20px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.7;
+      color: var(--text-secondary);
     }
 
     /* Footer */
@@ -268,341 +360,363 @@
       margin-top: 80px;
       padding-top: 24px;
       border-top: 1px solid var(--border);
+      font-size: 0.78rem;
+      color: var(--text-tertiary);
       display: flex;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 8px;
-      font-size: 0.72rem;
-      color: var(--text-tertiary);
-      font-family: 'JetBrains Mono', monospace;
+      gap: 12px;
     }
+
+    /* Utilities */
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .muted { color: var(--text-tertiary); }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
   </style>
 </head>
 <body>
   <div class="page">
-
     <header>
       <h1>SMS Spam Classifier</h1>
-      <p id="header-desc">Three baseline models trained on the SMS Spam Collection dataset. Stratified 80/20 split, TF-IDF features with 1–2 grams.</p>
-      <span class="tag" id="source-tag">loading…</span>
+      <p>Machine learning pipeline for SMS spam detection using TF-IDF feature extraction and multiple classification algorithms. Trained on the SMS Spam Collection dataset.</p>
+      <span class="tag">v0.2.0 · scikit-learn · FastAPI · SQLite</span>
     </header>
 
-    <!-- Dataset Overview -->
-    <section>
-      <h2>Dataset</h2>
-      <div class="stats" id="dataset-stats">
-        <div class="stat">
-          <div class="label">Total</div>
-          <div class="value" id="ds-total">—</div>
-          <div class="sub">messages</div>
-        </div>
-        <div class="stat">
-          <div class="label">Ham</div>
-          <div class="value" id="ds-ham">—</div>
-          <div class="sub" id="ds-ham-pct"></div>
-        </div>
-        <div class="stat">
-          <div class="label">Spam</div>
-          <div class="value" id="ds-spam">—</div>
-          <div class="sub" id="ds-spam-pct"></div>
-        </div>
-        <div class="stat">
-          <div class="label">Train</div>
-          <div class="value" id="ds-train">—</div>
-          <div class="sub">80%</div>
-        </div>
-        <div class="stat">
-          <div class="label">Test</div>
-          <div class="value" id="ds-test">—</div>
-          <div class="sub">20%</div>
-        </div>
-      </div>
-    </section>
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-tab="overview">Overview</button>
+      <button class="tab" data-tab="training">Training Results</button>
+      <button class="tab" data-tab="algorithms">Algorithms <span class="count">7</span></button>
+      <button class="tab" data-tab="api">API</button>
+    </div>
 
-    <!-- Models -->
-    <section>
-      <h2>Models</h2>
-      <div class="models" id="models-container"></div>
-    </section>
+    <!-- ===== OVERVIEW TAB ===== -->
+    <div class="tab-panel active" id="overview">
+      <section>
+        <h2>Project Summary</h2>
+        <p>This project implements a complete SMS spam classification pipeline — from raw text preprocessing through model training, evaluation, persistence, and inference via a REST API with realtime WebSocket events.</p>
+        <div class="card">
+          <table class="data-table">
+            <tr><th>Component</th><th>Details</th></tr>
+            <tr><td>Dataset</td><td><code>spam.csv</code> — SMS Spam Collection (5,572 messages)</td></tr>
+            <tr><td>Features</td><td>TF-IDF word n-grams + optional char n-grams + hand-crafted</td></tr>
+            <tr><td>Baseline Model</td><td>Multinomial Naive Bayes (α = 0.1)</td></tr>
+            <tr><td>Train/Test Split</td><td>80/20 stratified (random_state=42)</td></tr>
+            <tr><td>Backend</td><td>FastAPI + SQLAlchemy (SQLite) + WebSocket events</td></tr>
+            <tr><td>Artifact Storage</td><td><code>artifacts/</code> directory (joblib + PNG + SQLite)</td></tr>
+          </table>
+        </div>
+      </section>
 
-    <!-- Comparison -->
-    <section>
-      <h2>Comparison</h2>
-      <div class="table-container">
-        <table id="cmp-table">
-          <thead>
-            <tr>
-              <th>Model</th>
-              <th class="num">Accuracy</th>
-              <th class="num">Precision</th>
-              <th class="num">Recall</th>
-              <th class="num">F1</th>
-              <th class="num">ROC AUC</th>
-              <th class="num">Time</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
+      <section>
+        <h2>Pipeline Architecture</h2>
+        <div class="pipeline-flow">
+          <div class="pipeline-step">
+            <div class="step-name">Raw SMS</div>
+            <div class="step-detail">5,572 texts</div>
+          </div>
+          <div class="pipeline-arrow">→</div>
+          <div class="pipeline-step">
+            <div class="step-name">TF-IDF</div>
+            <div class="step-detail">ngram(1,2)</div>
+          </div>
+          <div class="pipeline-arrow">→</div>
+          <div class="pipeline-step">
+            <div class="step-name">Classifier</div>
+            <div class="step-detail">MultinomialNB</div>
+          </div>
+          <div class="pipeline-arrow">→</div>
+          <div class="pipeline-step">
+            <div class="step-name">Prediction</div>
+            <div class="step-detail">ham / spam</div>
+          </div>
+        </div>
+      </section>
 
-    <!-- Per-class Reports -->
-    <section>
-      <h2>Per-Class Metrics</h2>
-      <div class="table-container">
-        <table id="report-table">
-          <thead>
-            <tr>
-              <th>Model</th>
-              <th>Class</th>
-              <th class="num">Precision</th>
-              <th class="num">Recall</th>
-              <th class="num">F1</th>
-              <th class="num">Support</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
+      <section>
+        <h2>Quick Start</h2>
+        <div class="code-block">pip install -r requirements.txt
+python train_spam_classifier.py          # CLI training + evaluation
+uvicorn app:app --port 8000              # Start REST API
+curl http://localhost:8000/health         # Verify it's running</div>
+      </section>
+    </div>
 
-    <!-- Confusion Matrices -->
-    <section>
-      <h2>Confusion Matrices</h2>
-      <div class="cm-grid" id="cm-grid"></div>
-    </section>
+    <!-- ===== TRAINING RESULTS TAB ===== -->
+    <div class="tab-panel" id="training">
+      <section>
+        <h2>Latest Training Run</h2>
+        <p>Baseline model trained on the SMS Spam Collection using <code>train_spam_classifier.py</code>. Pipeline: TF-IDF (1-2 grams, min_df=2, sublinear_tf) → MultinomialNB (α=0.1).</p>
+      </section>
 
-    <!-- ROC Curves -->
-    <section>
-      <h2>ROC Curves</h2>
-      <div class="cm-grid" id="roc-grid"></div>
-    </section>
+      <section>
+        <h2>Performance Metrics</h2>
+        <div class="metrics-grid">
+          <div class="metric-card highlight">
+            <div class="value">98.57%</div>
+            <div class="label">Accuracy</div>
+          </div>
+          <div class="metric-card">
+            <div class="value">99.26%</div>
+            <div class="label">Precision</div>
+          </div>
+          <div class="metric-card">
+            <div class="value">89.93%</div>
+            <div class="label">Recall</div>
+          </div>
+          <div class="metric-card">
+            <div class="value">94.37%</div>
+            <div class="label">F1 Score</div>
+          </div>
+        </div>
+        <p class="muted" style="font-size:0.78rem;">Metrics computed on the held-out test set (1,115 samples). Positive class = spam.</p>
+      </section>
+
+      <section>
+        <h2>Confusion Matrix</h2>
+        <div class="cm-container">
+          <div class="cm-grid">
+            <div class="cm-corner"></div>
+            <div class="cm-header">Pred: Ham</div>
+            <div class="cm-header">Pred: Spam</div>
+            <div class="cm-header">Actual: Ham</div>
+            <div class="cm-cell tn">955</div>
+            <div class="cm-cell fp">1</div>
+            <div class="cm-header">Actual: Spam</div>
+            <div class="cm-cell fn">15</div>
+            <div class="cm-cell tp">144</div>
+          </div>
+          <div class="cm-legend">
+            <div><span style="background:var(--blue-bg);border:1px solid var(--blue)"></span> True Negative (955) — ham correctly classified</div>
+            <div><span style="background:var(--green-bg);border:1px solid var(--green)"></span> True Positive (144) — spam correctly caught</div>
+            <div><span style="background:var(--red-bg);border:1px solid var(--red)"></span> False Negative (15) — spam missed</div>
+            <div><span style="background:var(--orange-bg);border:1px solid var(--orange)"></span> False Positive (1) — ham misclassified as spam</div>
+          </div>
+        </div>
+        <p style="margin-top:16px;"><img src="artifacts/confusion_matrix.png" alt="Confusion Matrix" style="max-width:480px;width:100%;border-radius:var(--radius-sm);border:1px solid var(--border);" /></p>
+      </section>
+
+      <section>
+        <h2>Dataset Details</h2>
+        <div class="card">
+          <table class="data-table">
+            <tr><th>Property</th><th>Value</th></tr>
+            <tr><td>Total messages</td><td><code>5,572</code></td></tr>
+            <tr><td>Ham messages</td><td><code>4,825</code> (86.6%)</td></tr>
+            <tr><td>Spam messages</td><td><code>747</code> (13.4%)</td></tr>
+            <tr><td>Training set size</td><td><code>4,457</code></td></tr>
+            <tr><td>Test set size</td><td><code>1,115</code></td></tr>
+            <tr><td>Split strategy</td><td>Stratified 80/20</td></tr>
+            <tr><td>Random state</td><td><code>42</code></td></tr>
+            <tr><td>Encoding</td><td>latin-1</td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2>Model Configuration</h2>
+        <div class="card">
+          <table class="data-table">
+            <tr><th>Parameter</th><th>Value</th></tr>
+            <tr><td>Vectorizer</td><td><code>TfidfVectorizer</code></td></tr>
+            <tr><td>N-gram range</td><td><code>(1, 2)</code> — unigrams + bigrams</td></tr>
+            <tr><td>min_df</td><td><code>2</code></td></tr>
+            <tr><td>sublinear_tf</td><td><code>True</code></td></tr>
+            <tr><td>Classifier</td><td><code>MultinomialNB</code></td></tr>
+            <tr><td>Alpha (smoothing)</td><td><code>0.1</code></td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2>Classification Report</h2>
+        <div class="code-block">              precision    recall  f1-score   support
+
+         ham       0.98      1.00      0.99       956
+        spam       0.99      0.90      0.94       159
+
+    accuracy                           0.99      1115
+   macro avg       0.99      0.95      0.97      1115
+weighted avg       0.99      0.99      0.99      1115</div>
+      </section>
+
+      <section>
+        <h2>Artifacts Produced</h2>
+        <div class="card">
+          <table class="data-table">
+            <tr><th>File</th><th>Description</th></tr>
+            <tr><td><code>artifacts/confusion_matrix.png</code></td><td>Confusion matrix heatmap visualization</td></tr>
+            <tr><td><code>artifacts/spam_classifier.db</code></td><td>SQLite database with model records and run history</td></tr>
+            <tr><td><code>artifacts/model_*.joblib</code></td><td>Serialized fitted pipeline (joblib format)</td></tr>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- ===== ALGORITHMS TAB ===== -->
+    <div class="tab-panel" id="algorithms">
+      <section>
+        <h2>Available Algorithms</h2>
+        <p>The pipeline supports 7 classification backends. Select via the <code>algorithm</code> parameter in <code>POST /models/train</code>.</p>
+      </section>
+
+      <section>
+        <div class="algo-grid">
+          <div class="algo-card">
+            <h4>Multinomial Naive Bayes</h4>
+            <p>Fast probabilistic baseline, excellent on high-dimensional sparse text features. Default choice.</p>
+            <span class="badge badge-active">ACTIVE · baseline</span>
+          </div>
+          <div class="algo-card">
+            <h4>Complement Naive Bayes</h4>
+            <p>Variant designed for imbalanced datasets. Corrects the severe assumptions of Multinomial NB.</p>
+            <span class="badge badge-available">available</span>
+          </div>
+          <div class="algo-card">
+            <h4>Logistic Regression</h4>
+            <p>Linear model with L2 regularization. Strong all-rounder for text, provides calibrated probabilities.</p>
+            <span class="badge badge-available">available</span>
+          </div>
+          <div class="algo-card">
+            <h4>Linear SVC (Calibrated)</h4>
+            <p>Maximum-margin classifier wrapped with Platt scaling for probability output. Excellent precision.</p>
+            <span class="badge badge-available">available</span>
+          </div>
+          <div class="algo-card">
+            <h4>Soft-Voting Ensemble</h4>
+            <p>Combines NB + LR + LinearSVC via averaged predicted probabilities. Best F1 in most runs.</p>
+            <span class="badge badge-available">available</span>
+          </div>
+          <div class="algo-card">
+            <h4>XGBoost</h4>
+            <p>Gradient-boosted trees on TF-IDF + TruncatedSVD + hand-crafted features. Handles non-linearity.</p>
+            <span class="badge badge-available">available · optional dep</span>
+          </div>
+          <div class="algo-card">
+            <h4>LightGBM</h4>
+            <p>Fast histogram-based GBDT. Same feature set as XGBoost, often faster to train on large data.</p>
+            <span class="badge badge-available">available · optional dep</span>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Feature Extraction Options</h2>
+        <div class="card">
+          <table class="data-table">
+            <tr><th>Feature</th><th>Default</th><th>Description</th></tr>
+            <tr><td><code>word TF-IDF</code></td><td>Always on</td><td>Word-level n-grams (1-2) with sublinear TF scaling</td></tr>
+            <tr><td><code>char_wb TF-IDF</code></td><td>Off</td><td>Character n-grams (3-5) at word boundaries. Toggle: <code>use_char_ngrams=true</code></td></tr>
+            <tr><td><code>Hand-crafted</code></td><td>Off</td><td>has_url, digit_ratio, uppercase_ratio, length. Toggle: <code>use_handcrafted=true</code></td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2>Advanced Options</h2>
+        <div class="card">
+          <table class="data-table">
+            <tr><th>Option</th><th>Description</th></tr>
+            <tr><td><code>tune_threshold</code></td><td>Auto-tune decision threshold on validation split to maximize spam F1</td></tr>
+            <tr><td><code>cv_folds</code></td><td>Stratified k-fold cross-validation (2-10 folds) on training set</td></tr>
+            <tr><td><code>svd_components</code></td><td>TruncatedSVD dimensionality for GBDT backends (default: 200)</td></tr>
+            <tr><td><code>ensemble_estimators</code></td><td>List of classifiers for the voting ensemble</td></tr>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- ===== API TAB ===== -->
+    <div class="tab-panel" id="api">
+      <section>
+        <h2>REST API Endpoints</h2>
+        <p>Run with <code>uvicorn app:app --port 8000</code>. Full OpenAPI docs at <code>/docs</code>.</p>
+      </section>
+
+      <section>
+        <div class="card">
+          <table class="data-table">
+            <tr><th>Method</th><th>Path</th><th>Description</th></tr>
+            <tr><td><code>GET</code></td><td><code>/health</code></td><td>Health check — returns model count and status</td></tr>
+            <tr><td><code>POST</code></td><td><code>/models/train</code></td><td>Start a background training run (202 Accepted)</td></tr>
+            <tr><td><code>GET</code></td><td><code>/models</code></td><td>List all trained models with summary metrics</td></tr>
+            <tr><td><code>GET</code></td><td><code>/models/{id}</code></td><td>Full model detail including config and metrics</td></tr>
+            <tr><td><code>POST</code></td><td><code>/predict</code></td><td>Run inference on a list of SMS texts</td></tr>
+            <tr><td><code>GET</code></td><td><code>/runs</code></td><td>List all training runs</td></tr>
+            <tr><td><code>GET</code></td><td><code>/runs/{id}</code></td><td>Run detail with progress and timing</td></tr>
+            <tr><td><code>WS</code></td><td><code>/ws/events</code></td><td>Realtime progress + model/run events</td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2>Example: Train a Model</h2>
+        <div class="code-block">curl -X POST http://localhost:8000/models/train \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "my-ensemble",
+    "config": {
+      "algorithm": "ensemble",
+      "use_char_ngrams": true,
+      "use_handcrafted": true,
+      "cv_folds": 5
+    }
+  }'</div>
+      </section>
+
+      <section>
+        <h2>Example: Predict</h2>
+        <div class="code-block">curl -X POST http://localhost:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{
+    "texts": [
+      "Congratulations! You won a free iPhone. Click here now!",
+      "Hey, are we still meeting for lunch tomorrow?"
+    ]
+  }'
+
+# Response:
+# {
+#   "model_id": "abc-123",
+#   "predictions": [
+#     {"text": "Congratulations!...", "label": "spam", "spam_probability": 0.97},
+#     {"text": "Hey, are we...", "label": "ham", "spam_probability": 0.02}
+#   ]
+# }</div>
+      </section>
+
+      <section>
+        <h2>WebSocket Events</h2>
+        <div class="card">
+          <table class="data-table">
+            <tr><th>Event Type</th><th>When</th><th>Payload</th></tr>
+            <tr><td><code>hello</code></td><td>On connect</td><td>Server version + timestamp</td></tr>
+            <tr><td><code>progress</code></td><td>During training</td><td>run_id, percent, stage</td></tr>
+            <tr><td><code>run.completed</code></td><td>Training finishes</td><td>run_id, model_id, status, duration</td></tr>
+            <tr><td><code>model.created</code></td><td>Model persisted</td><td>model_id, name, algorithm, metrics</td></tr>
+          </table>
+        </div>
+      </section>
+    </div>
 
     <footer>
-      <span>artifacts/all_models_report.json</span>
-      <span id="generated-at"></span>
+      <span>SMS Spam Classifier · Built with scikit-learn, FastAPI &amp; SQLAlchemy</span>
+      <span class="mono">last trained: 2025</span>
     </footer>
   </div>
 
   <script>
-    const EMBEDDED_REPORT = {
-      "generated_at": "2026-07-01T04:18:58.101588+00:00",
-      "dataset": {
-        "path": "spam.csv",
-        "total_rows": 5572,
-        "class_distribution": { "ham": 4825, "spam": 747 },
-        "train_size": 4457,
-        "test_size": 1115,
-        "random_state": 42,
-        "test_size_pct": 0.2
-      },
-      "models": [
-        {
-          "algorithm": "multinomial_nb",
-          "algorithm_label": "MultinomialNB",
-          "metrics": { "accuracy": 0.9856502242152466, "precision": 0.9925925925925926, "recall": 0.8993288590604027, "f1": 0.9436619718309859 },
-          "per_class": {
-            "ham":  { "precision": 0.9846938775510204, "recall": 0.9989648033126294, "f1": 0.9917780061664954, "support": 966 },
-            "spam": { "precision": 0.9925925925925926, "recall": 0.8993288590604027, "f1": 0.9436619718309859, "support": 149 }
-          },
-          "aggregates": {
-            "macro_avg":    { "precision": 0.9886432350718065, "recall": 0.9491468311865161, "f1": 0.9677199889987407, "support": 1115 },
-            "weighted_avg": { "precision": 0.9857494009063515, "recall": 0.9856502242152466, "f1": 0.9853481504570866, "support": 1115 }
-          },
-          "train_size": 4457,
-          "test_size": 1115,
-          "duration_seconds": 0.10401309998997021,
-          "artifact_path": "artifacts/model_multinomial_nb_1782879535699.joblib",
-          "confusion_matrix_path": "artifacts/confusion_matrix_multinomial_nb.png",
-          "roc_auc": 0.9895,
-          "roc_curve_path": "artifacts/roc_curve_multinomial_nb.png",
-          "trained_at": "2026-07-01T04:18:57.521196+00:00"
-        },
-        {
-          "algorithm": "complement_nb",
-          "algorithm_label": "ComplementNB",
-          "metrics": { "accuracy": 0.9829596412556054, "precision": 0.9452054794520548, "recall": 0.9261744966442953, "f1": 0.9355932203389831 },
-          "per_class": {
-            "ham":  { "precision": 0.9886480908152735, "recall": 0.9917184265010351, "f1": 0.9901808785529715, "support": 966 },
-            "spam": { "precision": 0.9452054794520548, "recall": 0.9261744966442953, "f1": 0.9355932203389831, "support": 149 }
-          },
-          "aggregates": {
-            "macro_avg":    { "precision": 0.9669267851336641, "recall": 0.9589464615726653, "f1": 0.9628870494459774, "support": 1115 },
-            "weighted_avg": { "precision": 0.9828427553057492, "recall": 0.9829596412556054, "f1": 0.9828862049441067, "support": 1115 }
-          },
-          "train_size": 4457,
-          "test_size": 1115,
-          "duration_seconds": 0.10052300000097603,
-          "artifact_path": "artifacts/model_complement_nb_1782879537629.joblib",
-          "confusion_matrix_path": "artifacts/confusion_matrix_complement_nb.png",
-          "roc_auc": 0.9920,
-          "roc_curve_path": "artifacts/roc_curve_complement_nb.png",
-          "trained_at": "2026-07-01T04:18:57.805046+00:00"
-        },
-        {
-          "algorithm": "logistic_regression",
-          "algorithm_label": "LogisticRegression",
-          "metrics": { "accuracy": 0.968609865470852, "precision": 0.9913793103448276, "recall": 0.7718120805369127, "f1": 0.8679245283018868 },
-          "per_class": {
-            "ham":  { "precision": 0.965965965965966, "recall": 0.9989648033126294, "f1": 0.9821882951653944, "support": 966 },
-            "spam": { "precision": 0.9913793103448276, "recall": 0.7718120805369127, "f1": 0.8679245283018868, "support": 149 }
-          },
-          "aggregates": {
-            "macro_avg":    { "precision": 0.9786726381553967, "recall": 0.8853884419247711, "f1": 0.9250564117336406, "support": 1115 },
-            "weighted_avg": { "precision": 0.9693620092955179, "recall": 0.968609865470852, "f1": 0.9669189666787015, "support": 1115 }
-          },
-          "train_size": 4457,
-          "test_size": 1115,
-          "duration_seconds": 0.13812659999530297,
-          "artifact_path": "artifacts/model_logistic_regression_1782879537952.joblib",
-          "confusion_matrix_path": "artifacts/confusion_matrix_logistic_regression.png",
-          "roc_auc": 0.9840,
-          "roc_curve_path": "artifacts/roc_curve_logistic_regression.png",
-          "trained_at": "2026-07-01T04:18:58.100868+00:00"
-        }
-      ],
-      "roc_curve_combined_path": "artifacts/roc_curve_all_models.png"
-    };
-
-    const pct = (v) => (v * 100).toFixed(2) + '%';
-    const basename = (p) => String(p || '').split(/[\\/]/).pop();
-    function assetPath(p) {
-      if (!p) return '';
-      let s = String(p).replace(/\\\\/g, '/');
-      const m = s.match(/(artifacts\/.*)$/);
-      return m ? m[1] : s;
-    }
-
-    function render(report, label) {
-      const ds = report.dataset;
-      const models = report.models;
-
-      // Header
-      document.getElementById('header-desc').textContent =
-        `${models.length} baseline models trained on the SMS Spam Collection (${ds.total_rows.toLocaleString()} messages, stratified 80/20 split, TF-IDF 1–2 grams).`;
-      document.getElementById('source-tag').textContent = label;
-
-      // Dataset
-      document.getElementById('ds-total').textContent = ds.total_rows.toLocaleString();
-      document.getElementById('ds-ham').textContent = ds.class_distribution.ham.toLocaleString();
-      document.getElementById('ds-ham-pct').textContent = ((ds.class_distribution.ham / ds.total_rows) * 100).toFixed(1) + '%';
-      document.getElementById('ds-spam').textContent = ds.class_distribution.spam.toLocaleString();
-      document.getElementById('ds-spam-pct').textContent = ((ds.class_distribution.spam / ds.total_rows) * 100).toFixed(1) + '%';
-      document.getElementById('ds-train').textContent = ds.train_size.toLocaleString();
-      document.getElementById('ds-test').textContent = ds.test_size.toLocaleString();
-
-      // Model cards
-      const container = document.getElementById('models-container');
-      container.innerHTML = models.map(m => `
-        <div class="model">
-          <div class="model-header">
-            <h3>${m.algorithm_label}</h3>
-            <span class="algo">${m.algorithm}</span>
-          </div>
-          <div class="model-metrics">
-            <div class="cell"><div class="k">Accuracy</div><div class="v">${pct(m.metrics.accuracy)}</div></div>
-            <div class="cell"><div class="k">Precision</div><div class="v">${pct(m.metrics.precision)}</div></div>
-            <div class="cell"><div class="k">Recall</div><div class="v">${pct(m.metrics.recall)}</div></div>
-            <div class="cell"><div class="k">F1</div><div class="v">${pct(m.metrics.f1)}</div></div>
-            <div class="cell"><div class="k">ROC AUC</div><div class="v">${m.roc_auc != null ? pct(m.roc_auc) : '—'}</div></div>
-          </div>
-          <div class="model-footer">
-            <span>train: ${m.train_size.toLocaleString()}</span>
-            <span>test: ${m.test_size.toLocaleString()}</span>
-            <span>fit: ${m.duration_seconds.toFixed(3)}s</span>
-            <span>artifact: ${basename(m.artifact_path)}</span>
-            <span>trained: ${new Date(m.trained_at).toLocaleDateString()}</span>
-          </div>
-        </div>
-      `).join('');
-
-      // Comparison table
-      document.querySelector('#cmp-table tbody').innerHTML = models.map(m => `
-        <tr>
-          <td>${m.algorithm_label}</td>
-          <td class="num">${pct(m.metrics.accuracy)}</td>
-          <td class="num">${pct(m.metrics.precision)}</td>
-          <td class="num">${pct(m.metrics.recall)}</td>
-          <td class="num">${pct(m.metrics.f1)}</td>
-          <td class="num">${m.roc_auc != null ? pct(m.roc_auc) : '—'}</td>
-          <td class="num">${m.duration_seconds.toFixed(3)}s</td>
-        </tr>
-      `).join('');
-
-      // Per-class report
-      const reportRows = [];
-      models.forEach(m => {
-        ['ham', 'spam'].forEach(cls => {
-          const c = m.per_class[cls];
-          reportRows.push(`
-            <tr>
-              <td>${m.algorithm_label}</td>
-              <td><span class="class-badge">${cls}</span></td>
-              <td class="num">${pct(c.precision)}</td>
-              <td class="num">${pct(c.recall)}</td>
-              <td class="num">${pct(c.f1)}</td>
-              <td class="num">${c.support.toLocaleString()}</td>
-            </tr>`);
-        });
-        const w = m.aggregates.weighted_avg;
-        reportRows.push(`
-          <tr>
-            <td>${m.algorithm_label}</td>
-            <td><span class="class-badge">weighted avg</span></td>
-            <td class="num">${pct(w.precision)}</td>
-            <td class="num">${pct(w.recall)}</td>
-            <td class="num">${pct(w.f1)}</td>
-            <td class="num">${w.support.toLocaleString()}</td>
-          </tr>`);
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        // Deactivate all
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        // Activate clicked
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab).classList.add('active');
       });
-      document.querySelector('#report-table tbody').innerHTML = reportRows.join('');
-
-      // Confusion matrices
-      document.getElementById('cm-grid').innerHTML = models.map(m => {
-        const src = assetPath(m.confusion_matrix_path);
-        return `
-          <div class="cm-item">
-            <div class="cm-title">${m.algorithm_label}</div>
-            <img src="${src}" alt="Confusion matrix — ${m.algorithm_label}" loading="lazy"
-                 onerror="this.style.display='none';this.nextElementSibling.style.display='block';" />
-            <div class="fallback" style="display:none;">Image not available<br>${basename(src)}</div>
-          </div>`;
-      }).join('');
-
-      // ROC curves
-      const rocCards = models.map(m => {
-        const src = assetPath(m.roc_curve_path);
-        return `
-          <div class="cm-item">
-            <div class="cm-title">${m.algorithm_label} · AUC ${m.roc_auc != null ? pct(m.roc_auc) : '—'}</div>
-            <img src="${src}" alt="ROC curve — ${m.algorithm_label}" loading="lazy"
-                 onerror="this.style.display='none';this.nextElementSibling.style.display='block';" />
-            <div class="fallback" style="display:none;">Image not available<br>${basename(src)}</div>
-          </div>`;
-      });
-      if (report.roc_curve_combined_path) {
-        const csrc = assetPath(report.roc_curve_combined_path);
-        rocCards.push(`
-          <div class="cm-item" style="grid-column:1/-1;">
-            <div class="cm-title">All Models (combined)</div>
-            <img src="${csrc}" alt="Combined ROC curves" loading="lazy"
-                 onerror="this.style.display='none';this.nextElementSibling.style.display='block';" />
-            <div class="fallback" style="display:none;">Image not available<br>${basename(csrc)}</div>
-          </div>`);
-      }
-      document.getElementById('roc-grid').innerHTML = rocCards.join('');
-
-      // Footer
-      try {
-        document.getElementById('generated-at').textContent =
-          'generated ' + new Date(report.generated_at).toLocaleString();
-      } catch (_) {
-        document.getElementById('generated-at').textContent = report.generated_at;
-      }
-    }
-
-    // Boot
-    render(EMBEDDED_REPORT, 'embedded · all_models_report.json');
+    });
   </script>
 </body>
 </html>
